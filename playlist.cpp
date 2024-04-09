@@ -1,18 +1,12 @@
 #include "playlist.h"
-#include <QDebug>
-#include <QPushButton>
+#include <qtypes.h>
 
 PlayList::PlayList(QWidget *parent)
-    : QLabel(parent),
-      m_vLeyout(new QVBoxLayout()),
-      m_ind(0),
-      m_curIndex(0)
+    : QListWidget(parent)
 {
-    this->setLayout(m_vLeyout);
-    m_vLeyout->setAlignment(Qt::AlignTop);
 }
 
-void PlayList::appendSongs(QStringList &songs)
+void PlayList::append_songs(QStringList &songs)
 {
     for (auto &song : songs)
     {
@@ -21,52 +15,41 @@ void PlayList::appendSongs(QStringList &songs)
             continue;
         }
 
-        m_set.insert(song);
+        m_set.insert(song.section("/", -1));
 
-        QStringList  cur_song = song.split("/");
-        QPushButton *btn      = new QPushButton(cur_song[cur_song.length() - 1]);
-
-        m_vLeyout->addWidget(btn);
         m_plist << song;
 
-        qint64 cur_ind = this->m_curIndex;
-        connect(btn, &QPushButton::clicked, [=]() { init_song(cur_ind); });
-        ++m_curIndex;
+        this->addItem(song.section("/", -1));
     }
-}
-
-void PlayList::init_song(qint64 i)
-{
-    if (m_plist.isEmpty())
-    {
-        return;
-    }
-
-    if (i < 0)
-    {
-        i = m_plist.size() - 1;
-    }
-    else if (i >= m_plist.size())
-    {
-        i = 0;
-    }
-    m_curSong  = m_plist[i];
-    m_curIndex = i;
-    
-    emit songIsReady();
 }
 
 void PlayList::set_next()
 {
-    init_song(m_curIndex + 1);
+    qint64 curr = currentRow();
+    ++curr;
+
+    if (curr == count())
+    {
+        curr = 0;
+    }
+
+    setCurrentRow(curr);
 }
 
 void PlayList::set_prev()
 {
-    init_song(m_curIndex - 1);
+    qint64 curr = currentRow();
+    --curr;
+
+    if (curr == -1)
+    {
+        curr = count() - 1;
+    }
+
+    setCurrentRow(curr);
 }
 
-QString PlayList::getCurrentSong()
+QString PlayList::getCurrentSong() 
 {
-    return m_curSong;
+    return m_plist[currentRow()];
 }

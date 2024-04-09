@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "playlist.h"
 #include <qt6/QtCore/qdebug.h>
+#include <qurl.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -62,7 +63,6 @@ MainWindow::MainWindow(QWidget *parent)
     name_label->setGeometry(460, 50, 170, 50);
     name_label->setStyleSheet("background-color: dimGray;");
     name_label->setAlignment(Qt::AlignCenter);
-    name_label->setText(song_name);
 
     m_volumeSlider->setGeometry(640, 50, 140, 50);
     m_volumeSlider->setValue(50);
@@ -82,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_open_btn, &QPushButton::clicked, this, &MainWindow::openFile);
     connect(next_song_button, &QPushButton::clicked, this, &MainWindow::handle_next);
     connect(prev_song_button, &QPushButton::clicked, this, &MainWindow::handle_prev);
-    connect(m_playlist, &PlayList::songIsReady, this, &MainWindow::handleSongReady);
+    connect(m_playlist, &PlayList::currentRowChanged, this, &MainWindow::handleCurrentChanged);
 
     connect(m_media_player_button, &QPushButton::clicked,
             [this]()
@@ -93,7 +93,6 @@ MainWindow::MainWindow(QWidget *parent)
                     play_flag = true;
                     m_media_player_button->setText("▐▐");
                 }
-
                 else
                 {
                     m_media_player->pause();
@@ -157,7 +156,7 @@ void MainWindow::openFile()
 {
     QStringList songs = QFileDialog::getOpenFileNames(this, tr("Open Audio File"), QDir::homePath(),
                                                       tr("Audio Files (*.mp3 *.wav *.ogg)"));
-    m_playlist->appendSongs(songs);
+    m_playlist->append_songs(songs);
 }
 
 void MainWindow::handle_next()
@@ -174,21 +173,20 @@ void MainWindow::handle_prev()
     m_media_player_button->setText("▐▐");
 }
 
-void MainWindow::handleSongReady()
+void MainWindow::handleCurrentChanged(qint64 curr)
 {
-    m_media_player->setSource(m_playlist->getCurrentSong());
-    QStringList song_list = m_playlist->getCurrentSong().split("/");
-    QString     song_name = song_list[song_list.length() - 1];
+    m_media_player->setSource(QUrl(m_playlist->getCurrentSong()));
+    QString song_name = m_playlist->getCurrentSong();
 
-    if (song_name.size() > 16)
+    QString res_name = song_name.section('/', -1);
+    
+    if (res_name.size() > 16)
     {
-        song_name = song_name.left(19);
-        song_name += "...";
+        res_name = res_name.left(19);
+        res_name += "...";
     }
 
-    name_label->setText(song_name);
-    m_media_player->play();
-    m_media_player_button->setText("▐▐");
+    name_label->setText(res_name);
 }
 
 MainWindow::~MainWindow() {}

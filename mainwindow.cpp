@@ -9,20 +9,20 @@ MainWindow::MainWindow(QWidget *parent)
       lock(false),
       m_media_player_button(new QPushButton(this)),
       m_media_stop_button(new QPushButton(this)),
-      media_forward_button(new QPushButton(this)),
-      media_back_button(new QPushButton(this)),
-      next_song_button(new QPushButton(this)),
-      prev_song_button(new QPushButton(this)),
+      m_media_forward_button(new QPushButton(this)),
+      m_media_back_button(new QPushButton(this)),
+      m_next_song_button(new QPushButton(this)),
+      m_prev_song_button(new QPushButton(this)),
       m_media_player(new QMediaPlayer(this)),
-      audio_output(new QAudioOutput(this)),
+      m_audio_output(new QAudioOutput(this)),
       m_volumeSlider(new QSlider(Qt::Orientation::Horizontal, this)),
       m_DurationSlider(new QSlider(Qt::Orientation::Horizontal, this)),
-      time_label(new QLabel("", this)),
-      name_label(new QLabel("", this)),
+      m_time_label(new QLabel("", this)),
+      m_name_label(new QLabel("", this)),
       m_open_btn(new QPushButton("open", this)),
       m_playlist(new PlayList(this))
 {
-    m_media_player->setAudioOutput(audio_output);
+    m_media_player->setAudioOutput(m_audio_output);
 
     this->setGeometry(100, 200, 850, 500);
     this->setFixedWidth(820);
@@ -31,15 +31,15 @@ MainWindow::MainWindow(QWidget *parent)
     m_media_player_button->setText("▶");
     m_media_player_button->setStyleSheet("background-color: dimGray;");
 
-    prev_song_button->setGeometry(150, 50, 50, 50);
-    prev_song_button->setStyleSheet("background-color: dimGray;");
-    prev_song_button->setText("⏮");
+    m_prev_song_button->setGeometry(150, 50, 50, 50);
+    m_prev_song_button->setStyleSheet("background-color: dimGray;");
+    m_prev_song_button->setText("⏮");
 
-    media_back_button->setGeometry(210, 50, 50, 50);
-    media_back_button->setStyleSheet("background-color: dimGray;");
-    media_back_button->setText("-10");
+    m_media_back_button->setGeometry(210, 50, 50, 50);
+    m_media_back_button->setStyleSheet("background-color: dimGray;");
+    m_media_back_button->setText("-10");
 
-    connect(media_back_button, &QPushButton::clicked,
+    connect(m_media_back_button, &QPushButton::clicked,
             [this]() { m_media_player->setPosition(m_media_player->position() - 10000); });
 
     m_media_stop_button->setGeometry(270, 50, 50, 50);
@@ -49,28 +49,28 @@ MainWindow::MainWindow(QWidget *parent)
     font.setPointSize(17);
     m_media_stop_button->setFont(font);
 
-    media_forward_button->setGeometry(330, 50, 50, 50);
-    media_forward_button->setStyleSheet("background-color: dimGray;");
-    media_forward_button->setText("+10");
+    m_media_forward_button->setGeometry(330, 50, 50, 50);
+    m_media_forward_button->setStyleSheet("background-color: dimGray;");
+    m_media_forward_button->setText("+10");
 
-    connect(media_forward_button, &QPushButton::clicked,
+    connect(m_media_forward_button, &QPushButton::clicked,
             [this]() { m_media_player->setPosition(m_media_player->position() + 10000); });
 
-    next_song_button->setGeometry(390, 50, 50, 50);
-    next_song_button->setStyleSheet("background-color: dimGray;");
-    next_song_button->setText("⏭");
+    m_next_song_button->setGeometry(390, 50, 50, 50);
+    m_next_song_button->setStyleSheet("background-color: dimGray;");
+    m_next_song_button->setText("⏭");
 
-    name_label->setGeometry(460, 50, 170, 50);
-    name_label->setStyleSheet("background-color: dimGray;");
-    name_label->setAlignment(Qt::AlignCenter);
+    m_name_label->setGeometry(460, 50, 170, 50);
+    m_name_label->setStyleSheet("background-color: dimGray;");
+    m_name_label->setAlignment(Qt::AlignCenter);
 
     m_volumeSlider->setGeometry(640, 50, 140, 50);
     m_volumeSlider->setValue(50);
 
     m_DurationSlider->setGeometry(50, 115, 600, 50);
 
-    time_label->setGeometry(675, 122, 100, 35);
-    time_label->setStyleSheet("background-color: dimGray;");
+    m_time_label->setGeometry(675, 122, 100, 35);
+    m_time_label->setStyleSheet("background-color: dimGray;");
 
     m_playlist->setGeometry(50, 175, 725, 180);
     m_playlist->setStyleSheet("background:#31363F; color: white;");
@@ -80,8 +80,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_DurationSlider, &QSlider::valueChanged, this, &MainWindow::handleDuration);
     connect(m_volumeSlider, &QSlider::valueChanged, this, &MainWindow::handleVolume);
     connect(m_open_btn, &QPushButton::clicked, this, &MainWindow::openFile);
-    connect(next_song_button, &QPushButton::clicked, this, &MainWindow::handle_next);
-    connect(prev_song_button, &QPushButton::clicked, this, &MainWindow::handle_prev);
+    connect(m_next_song_button, &QPushButton::clicked, this, &MainWindow::handleNext);
+    connect(m_prev_song_button, &QPushButton::clicked, this, &MainWindow::handlePrev);
     connect(m_playlist, &PlayList::currentRowChanged, this, &MainWindow::handleCurrentChanged);
 
     connect(m_media_player_button, &QPushButton::clicked,
@@ -120,8 +120,8 @@ void MainWindow::datachanged()
 void MainWindow::setTime(qint64 m)
 {
     qint64 time = m_milis - m;
-    time_label->setText(QString::number(time / 60000) + " : " + QString::number((time % 60000) / 1000));
-    time_label->setAlignment(Qt::AlignCenter);
+    m_time_label->setText(QString::number(time / 60000) + " : " + QString::number((time % 60000) / 1000));
+    m_time_label->setAlignment(Qt::AlignCenter);
 }
 
 void MainWindow::handlePosition(qint64 m)
@@ -149,7 +149,7 @@ void MainWindow::handleDuration()
 
 void MainWindow::handleVolume()
 {
-    audio_output->setVolume(m_volumeSlider->value() / 100.0);
+    m_audio_output->setVolume(m_volumeSlider->value() / 100.0);
 }
 
 void MainWindow::openFile()
@@ -159,16 +159,16 @@ void MainWindow::openFile()
     m_playlist->append_songs(songs);
 }
 
-void MainWindow::handle_next()
+void MainWindow::handleNext()
 {
-    m_playlist->set_next();
+    m_playlist->setNext();
     m_media_player->play();
     m_media_player_button->setText("▐▐");
 }
 
-void MainWindow::handle_prev()
+void MainWindow::handlePrev()
 {
-    m_playlist->set_prev();
+    m_playlist->setPrev();
     m_media_player->play();
     m_media_player_button->setText("▐▐");
 }
@@ -179,14 +179,16 @@ void MainWindow::handleCurrentChanged(qint64 curr)
     QString song_name = m_playlist->getCurrentSong();
 
     QString res_name = song_name.section('/', -1);
-    
+
     if (res_name.size() > 16)
     {
         res_name = res_name.left(19);
         res_name += "...";
     }
 
-    name_label->setText(res_name);
+    m_name_label->setText(res_name);
+    m_media_player->play();
+    m_media_player_button->setText("▐▐");
 }
 
 MainWindow::~MainWindow() {}

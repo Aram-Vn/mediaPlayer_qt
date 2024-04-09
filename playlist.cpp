@@ -23,7 +23,7 @@ void PlayList::append_songs(QStringList &songs)
     }
 }
 
-void PlayList::set_next()
+void PlayList::setNext()
 {
     qint64 curr = currentRow();
     ++curr;
@@ -36,7 +36,7 @@ void PlayList::set_next()
     setCurrentRow(curr);
 }
 
-void PlayList::set_prev()
+void PlayList::setPrev()
 {
     qint64 curr = currentRow();
     --curr;
@@ -49,7 +49,7 @@ void PlayList::set_prev()
     setCurrentRow(curr);
 }
 
-QString PlayList::getCurrentSong() 
+QString PlayList::getCurrentSong()
 {
     return m_plist[currentRow()];
 }

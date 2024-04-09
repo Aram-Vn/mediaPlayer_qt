@@ -14,8 +14,8 @@ public:
 
 public:
     void    append_songs(QStringList &songs);
-    void    set_next();
-    void    set_prev();
+    void    setNext();
+    void    setPrev();
     QString getCurrentSong();
 
 private:
